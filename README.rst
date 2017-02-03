@@ -1,5 +1,5 @@
-transcode
-=========
+django-assent
+=============
 
 Below you will find basic setup and deployment instructions for the project.
 To begin you should have the following applications installed on your

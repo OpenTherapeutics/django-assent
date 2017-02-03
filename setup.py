@@ -3,7 +3,7 @@ import codecs
 from setuptools import setup, find_packages
 
 
-app = __import__('transcode')
+app = __import__('assent')
 VERSION = app.get_version()
 DESCRIPTION = app.__doc__
 HERE = os.path.dirname(__file__)
