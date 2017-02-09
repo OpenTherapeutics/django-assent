@@ -2,6 +2,7 @@
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from choice_enum import ChoiceEnumeration
@@ -23,15 +24,18 @@ class Agreement(models.Model):
     short_description = models.CharField(
         _('short description'), max_length=255, blank=False, default='')
 
+    latest_version = models.OneToOneField(
+        'assent.AgreementVersion', blank=True, null=True, related_name='+')
+    # Note, this should only be updated when we add a new version
+    # This is currently done in AgreementVersion.save()
+    date_modified = models.DateTimeField(default=timezone.now, editable=False)
+
     class Meta:
         verbose_name = _('agreement')
         verbose_name_plural = _('agreements')
 
     def __str__(self):
         return self.document_key
-
-    def latest_version(self):
-        return self.versions.latest()
 
 
 class AgreementUser(models.Model):
@@ -92,3 +96,11 @@ class AgreementVersion(models.Model):
 
     def get_rendered_content(self):
         return transcode_render(self.content, self.content_format)
+
+    def save(self, *args, **kwargs):
+        super(AgreementVersion, self).save(*args, **kwargs)
+        if self.pk is not None:
+            if self.agreement:
+                self.agreement.latest_version = self
+                self.agreement.date_modified = self.release_date
+                self.agreement.save()
