@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'otaccount.UserAccount'
+# AUTH_USER_MODEL = 'otaccount.UserAccount'
 
 # Application definition
 

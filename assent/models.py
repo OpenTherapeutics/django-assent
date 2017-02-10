@@ -30,7 +30,8 @@ class Agreement(models.Model):
         'assent.AgreementVersion', blank=True, null=True, related_name='+')
     # Note, this should only be updated when we add a new version
     # This is currently done in AgreementVersion.save()
-    date_modified = models.DateTimeField(default=timezone.now, editable=False)
+    date_modified = models.DateTimeField(
+        default=timezone.now, blank=True, null=True, editable=False)
 
     class Meta:
         verbose_name = _('agreement')
@@ -87,7 +88,7 @@ class AgreementVersion(models.Model):
         verbose_name_plural = _('agreement versions')
 
     def __str__(self):
-        return _('Agreement: {0} released: {1:%Y-%m-%d %H:%M}').format(
+        return _('Agreement: "{0}" released: {1:%Y-%m-%d %H:%M}').format(
             self.agreement.document_key, self.release_date)
 
     def get_rendered_content(self):
