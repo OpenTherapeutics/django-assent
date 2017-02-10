@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'otaccount.UserAccount'
 
 # Application definition
 
@@ -130,7 +131,8 @@ ASSENT_FORMATTERS = {
         'label': 'Simple text format',
         'transcoder': 'transcode.render.render_simple',
         'kwargs': {},
-        'args': ()
+        'args': (),
+        'default': True,
     },
     HTML_FORMAT: {
         'label': 'HTML format',

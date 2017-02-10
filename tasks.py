@@ -6,6 +6,7 @@ from invoke import task
 BUILDDIR = "build"
 PROJECT = "assent"
 
+
 @task
 def clean(ctx):
     """Removes all the cache files"""
@@ -38,7 +39,7 @@ def checks(ctx):
     ctx.run("flake8 {} .".format(excl))
 
 
-@task
+@task(develop)
 def test(ctx):
     """Runs the tests"""
     ctx.run(

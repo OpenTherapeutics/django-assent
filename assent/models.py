@@ -5,14 +5,16 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from choice_enum import ChoiceEnumeration
+from choice_enum import Option, make_enum_class
 
-from transcode.conf import (
-    HTML_FORMAT, SIMPLE_TEXT_FORMAT, MARKDOWN_FORMAT, RST_FORMAT)
 from transcode.render import render as transcode_render
 
 
-FMT = settings.ASSENT_FORMATTERS
+# Converts the ASSENT_FORMATTERS setting to a ChoiceEnum
+_choice_enum_kwargs = {
+    k: Option(k, v['label'], default='default' in v) for k, v in
+    settings.ASSENT_FORMATTERS.items()}
+ContentFormat = make_enum_class('ContentFormat', **_choice_enum_kwargs)
 
 
 class Agreement(models.Model):
@@ -59,12 +61,6 @@ class AgreementUser(models.Model):
 
 
 class AgreementVersion(models.Model):
-    class ContentFormat(ChoiceEnumeration):
-        TEXT = ChoiceEnumeration.Option(SIMPLE_TEXT_FORMAT, _('Plain Text'), default=True)
-        HTML = ChoiceEnumeration.Option(HTML_FORMAT, _('HTML'))
-        MARK = ChoiceEnumeration.Option(MARKDOWN_FORMAT, _('Markdown'))
-        REST = ChoiceEnumeration.Option(RST_FORMAT, _('ReStructured Text'))
-
     users = models.ManyToManyField(
         to=settings.AUTH_USER_MODEL, through='assent.AgreementUser',
         related_name='agreement_versions', verbose_name=_('users'))
@@ -91,8 +87,8 @@ class AgreementVersion(models.Model):
         verbose_name_plural = _('agreement versions')
 
     def __str__(self):
-        return _('Agreement: {0} version: {1:%Y-%m-%d %H:%M}').format(
-            self.agreement.short_description, self.release_date)
+        return _('Agreement: {0} released: {1:%Y-%m-%d %H:%M}').format(
+            self.agreement.document_key, self.release_date)
 
     def get_rendered_content(self):
         return transcode_render(self.content, self.content_format)
