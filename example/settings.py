@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # 'transcode',
+    'bootstrap3',
     'assent',
 ]
 
@@ -125,31 +126,32 @@ STATIC_URL = '/static/'
 
 from transcode.conf import (
     SIMPLE_TEXT_FORMAT, HTML_FORMAT, MARKDOWN_FORMAT, RST_FORMAT)
+from collections import OrderedDict
 
-ASSENT_FORMATTERS = {
-    SIMPLE_TEXT_FORMAT: {
+ASSENT_FORMATTERS = OrderedDict((
+    (SIMPLE_TEXT_FORMAT, {
         'label': 'Simple text format',
         'transcoder': 'transcode.render.render_simple',
         'kwargs': {},
         'args': (),
         'default': True,
-    },
-    HTML_FORMAT: {
+    }),
+    (HTML_FORMAT, {
         'label': 'HTML format',
         'transcoder': 'transcode.render.render_html',
         'kwargs': {},
         'args': ()
-    },
-    MARKDOWN_FORMAT: {
+    }),
+    (MARKDOWN_FORMAT, {
         'label': 'Markdown format',
         'transcoder': 'transcode.render.render_markdown',
         'kwargs': {},
         'args': ()
-    },
-    RST_FORMAT: {
+    }),
+    (RST_FORMAT, {
         'label': 'ReStructured Text format',
         'transcoder': 'transcode.render.render_restructuredtext',
         'kwargs': {},
         'args': ()
-    },
-}
+    }),
+))

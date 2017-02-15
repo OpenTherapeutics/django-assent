@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load i18n bootstrap3 %}
+
+{% block heading %}{% trans "Agreements" %}{% endblock %}
+{% block subheading %}{% endblock %}
+{% block breadcrumb %}
+    <li><a href="/"><i class="fa fa-home"></i></a></li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-xs-12">
+            {% block content %}
+            <p>Agreements coming soon.</p>
+            {% endblock %}
+        </div>
+    </div>
+    <!-- /.row -->
+    <hr>
+</div>
+{% endblock %}

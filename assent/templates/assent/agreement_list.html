@@ -1,0 +1,28 @@
+{% extends "assent/base.html" %}
+{% load bootstrap3 breadcrumb_tags i18n l10n staticfiles %}
+
+{% blocktrans asvar title %}My Agreements{% endblocktrans %}
+{% block title %}{{ title }}- {{ block.super }}{% endblock title %}
+
+
+{% block heading %}
+    {{ title }}
+{% endblock %}
+
+
+{% block breadcrumb %}
+    {{ block.super }}
+    {% breadcrumb title %}
+{% endblock %}
+
+
+{% block content %}
+    <ul class="agreement-list">
+    {% for agreement in object_list %}
+        <li class="agreement">
+            <span class="title"><a href="{{ agreement.agreement_version.agreement.get_absolute_url }}">{{ agreement.agreement_version.full_title }}</a></span>
+            <span class="agreement-date">{% trans "Version:" %} {{ agreement.agreement_version.release_date }}</span>
+            <span class="accepted-date">{% trans "Accepted:" %} {{ agreement.acceptance_date }}</span></li>
+    {% endfor %}
+    </ul>
+{% endblock content %}

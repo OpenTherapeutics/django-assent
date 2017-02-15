@@ -1,0 +1,27 @@
+{% extends "assent/base.html" %}
+{% load bootstrap3 breadcrumb_tags i18n l10n staticfiles %}
+
+
+{% block title %}{{ object.agreement_version.full_title }} - {{ block.super }}{% endblock title %}
+
+
+{% block heading %}
+    {{ object.agreement_version.full_title }}
+{% endblock %}
+
+
+{% block breadcrumb %}
+    {{ block.super }}
+    {% blocktrans asvar accept_agreement %}Agreements{% endblocktrans %}
+    {% breadcrumb_url accept_agreement 'assent:home' %}
+    {% breadcrumb object.agreement_version.full_title %}
+{% endblock %}
+
+
+{% block content %}
+    <h1>{{ object.agreement_version.full_title }}</h1>
+    <h3>{% trans "Version:" %} {{ object.agreement_version.release_date }}</h3>
+    <div class="agreement">
+        {{ object.agreement_version.get_rendered_content|safe }}
+    </div>
+{% endblock content %}

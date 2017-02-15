@@ -1,33 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from choice_enum import Option, make_enum_class
-
-from transcode.render import render as transcode_render
-
-
-# Converts the ASSENT_FORMATTERS setting to a ChoiceEnum
-_choice_enum_kwargs = {
-    k: Option(k, v['label'], default='default' in v) for k, v in
-    settings.ASSENT_FORMATTERS.items()}
-ContentFormat = make_enum_class('ContentFormat', **_choice_enum_kwargs)
+from transcode.render import render
 
 
 class Agreement(models.Model):
     document_key = models.CharField(
         _('document key'), max_length=255, blank=False, default='',
         unique=True)
+    slug = models.SlugField(
+        _('slug'), max_length=255, blank=False, default='')
     description = models.CharField(
         _('description'), max_length=4096, blank=False, default='')
     short_description = models.CharField(
         _('short description'), max_length=255, blank=False, default='')
 
     latest_version = models.OneToOneField(
-        'assent.AgreementVersion', blank=True, null=True, related_name='+')
+        'assent.AgreementVersion', blank=True, null=True,
+        related_name='agreement_latest_version')
     # Note, this should only be updated when we add a new version
     # This is currently done in AgreementVersion.save()
     date_modified = models.DateTimeField(
@@ -36,6 +31,9 @@ class Agreement(models.Model):
     class Meta:
         verbose_name = _('agreement')
         verbose_name_plural = _('agreements')
+
+    def get_absolute_url(self):
+        return reverse('assent:agreement_detail', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.document_key
@@ -48,13 +46,14 @@ class AgreementUser(models.Model):
         verbose_name=_('agreement_version'),
         related_name='agreement_users', blank=False)
     acceptance_date = models.DateTimeField(
-        _('acceptance date'), auto_now_add=True)
+        _('acceptance date'), blank=True, null=True)
     ip_address = models.GenericIPAddressField(
         _('IP address'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('agreement user')
         verbose_name_plural = _('agreement users')
+        unique_together = (('user', 'agreement_version', ), )
 
     def __str__(self):
         return _('User: {0}, agreement: {1}').format(
@@ -76,14 +75,13 @@ class AgreementVersion(models.Model):
     content = models.TextField(
         _('content'), blank=True, default='')
     content_format = models.CharField(
-        _('content format'), max_length=8, choices=ContentFormat.CHOICES,
-        default=ContentFormat.DEFAULT, blank=False)
+        _('Content format'), max_length=4, blank=False, default='')
     release_date = models.DateTimeField(
         _('release date'), auto_now_add=True)
 
     class Meta:
-        get_latest_by = ('release_date', )
         ordering = ('-release_date', )
+        get_latest_by = ('release_date', )
         verbose_name = _('agreement version')
         verbose_name_plural = _('agreement versions')
 
@@ -92,12 +90,11 @@ class AgreementVersion(models.Model):
             self.agreement.document_key, self.release_date)
 
     def get_rendered_content(self):
-        return transcode_render(self.content, self.content_format)
+        return render(self.content, self.content_format)
 
     def save(self, *args, **kwargs):
         super(AgreementVersion, self).save(*args, **kwargs)
-        if self.pk is not None:
-            if self.agreement:
-                self.agreement.latest_version = self
-                self.agreement.date_modified = self.release_date
-                self.agreement.save()
+        if self.pk is not None and self.agreement_id:
+            self.agreement.latest_version = self
+            self.agreement.date_modified = self.release_date
+            self.agreement.save()

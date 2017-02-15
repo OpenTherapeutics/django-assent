@@ -1,0 +1,34 @@
+{% extends "assent/base.html" %}
+{% load bootstrap3 breadcrumb_tags i18n l10n staticfiles %}
+
+
+{% block title %}{{ agreement_version.full_title }} - {{ block.super }}{% endblock title %}
+
+
+{% block heading %}
+    {{ agreement_version.full_title }}
+{% endblock %}
+
+
+{% block breadcrumb %}
+    {{ block.super }}
+    {% blocktrans asvar accept_agreement %}Agreements{% endblocktrans %}
+    {% breadcrumb_url accept_agreement 'assent:home' %}
+    {% breadcrumb agreement_version.full_title %}
+{% endblock %}
+
+
+
+{% block content %}
+    <form action="" enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <div class="agreement">
+            {{ agreement_version.get_rendered_content|safe }}
+        </div>
+        <button class="btn btn-primary" type="submit">{% trans "Accept" %}</button>
+        <button class="btn btn-default" type="cancel">{% trans "Cancel" %}</button>
+    </form>
+    {{ form.media.css }}
+    {{ form.media.js }}
+{% endblock content %}
